@@ -59,7 +59,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 from notion_client_module import get_tasks
-from data_processing import build_dataframe, compute_kpis
+from data_processing import build_dataframe, build_timeline_data, compute_kpis
 from config import CHART_CONFIG
 import charts
 
@@ -232,6 +232,40 @@ with k4:
     st.markdown(kpi_card("Blocked", str(kpis["blocked"]), blocked_accent), unsafe_allow_html=True)
 
 
+# --- Task Timeline Section ---
+tl_hdr_col, tl_spacer, tl_lbl_col, tl_sel_col = st.columns([6, 2, 0.5, 1])
+with tl_hdr_col:
+    section_header("Task Timeline")
+with tl_lbl_col:
+    st.markdown(
+        '<span style="font-size:0.7rem; color:#64748B; margin-top:60px; display:block;">View</span>',
+        unsafe_allow_html=True,
+    )
+with tl_sel_col:
+    st.markdown('<div style="margin-top:48px;">', unsafe_allow_html=True)
+    tl_view = st.selectbox(
+        "Timeline view",
+        ["1d", "3d", "1w"],
+        index=1,
+        label_visibility="collapsed",
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+_view_to_freq = {"1d": "1D", "3d": "3D", "1w": "7D"}
+timeline_data = build_timeline_data(df, window=_view_to_freq[tl_view])
+if not timeline_data.empty:
+    st.plotly_chart(
+        charts.task_timeline(timeline_data),
+        use_container_width=True,
+        config=CHART_CONFIG,
+    )
+else:
+    st.info("No tasks with due dates to display timeline.")
+
+section_header("Priority Matrix")
+st.plotly_chart(charts.priority_heatmap(df_by_owner), use_container_width=True, config=CHART_CONFIG)
+
+
 # --- Team Performance Section ---
 section_header("Team Performance")
 
@@ -262,11 +296,5 @@ with st.expander(f"View Overdue Tasks ({len(overdue_df)})", expanded=False):
 # --- Work Breakdown Section ---
 section_header("Work Breakdown")
 
-wb_col1, wb_col2 = st.columns([3, 2])
-
-with wb_col1:
-    treemap_fig, n_uncat = charts.category_treemap(df)
-    st.plotly_chart(treemap_fig, use_container_width=True, config=CHART_CONFIG)
-
-with wb_col2:
-    st.plotly_chart(charts.priority_heatmap(df_by_owner), use_container_width=True, config=CHART_CONFIG)
+treemap_fig, n_uncat = charts.category_treemap(df)
+st.plotly_chart(treemap_fig, use_container_width=True, config=CHART_CONFIG)
