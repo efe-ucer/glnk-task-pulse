@@ -51,6 +51,7 @@ SCORECARD_ORDER = ["Completed", "On Track", "Overdue"]
 
 # Dark-mode Plotly layout defaults
 LAYOUT_DEFAULTS = dict(
+    dragmode=False,
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
     font=dict(family="Inter, -apple-system, BlinkMacSystemFont, sans-serif", color="#CBD5E1", size=12),
@@ -66,14 +67,16 @@ LAYOUT_DEFAULTS = dict(
         font=dict(color="#94A3B8", size=11),
     ),
     xaxis=dict(
+        fixedrange=True,
         gridcolor="rgba(148,163,184,0.08)",
         zerolinecolor="rgba(148,163,184,0.12)",
     ),
     yaxis=dict(
+        fixedrange=True,
         gridcolor="rgba(148,163,184,0.08)",
         zerolinecolor="rgba(148,163,184,0.12)",
     ),
 )
 
-# Plotly chart display config (hides modebar for clean embedded look)
-CHART_CONFIG = {"displayModeBar": False}
+# Plotly chart display config (hides modebar, disables drag-to-zoom for mobile)
+CHART_CONFIG = {"displayModeBar": False, "scrollZoom": False}
