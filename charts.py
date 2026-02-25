@@ -161,7 +161,7 @@ def task_timeline(timeline_df: pd.DataFrame) -> go.Figure:
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.08,
+            y=1.18,
             xanchor="right",
             x=1,
             bgcolor="rgba(0,0,0,0)",
@@ -169,7 +169,7 @@ def task_timeline(timeline_df: pd.DataFrame) -> go.Figure:
         ),
     )
 
-    return _apply_layout(fig, height=380, margin=dict(l=50, r=20, t=50, b=20))
+    return _apply_layout(fig, height=380, margin=dict(l=50, r=20, t=70, b=20))
 
 
 def owner_scorecard(df_by_owner: pd.DataFrame) -> go.Figure:
