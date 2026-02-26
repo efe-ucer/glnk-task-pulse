@@ -143,7 +143,7 @@ def task_timeline(timeline_df: pd.DataFrame) -> go.Figure:
                 borderwidth=1,
                 font=dict(color="#CBD5E1", size=11),
                 x=0,
-                y=1.08,
+                y=-0.22,
             ),
             type="date",
             gridcolor="rgba(148,163,184,0.08)",
@@ -161,7 +161,7 @@ def task_timeline(timeline_df: pd.DataFrame) -> go.Figure:
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.18,
+            y=1.08,
             xanchor="right",
             x=1,
             bgcolor="rgba(0,0,0,0)",
@@ -169,7 +169,7 @@ def task_timeline(timeline_df: pd.DataFrame) -> go.Figure:
         ),
     )
 
-    return _apply_layout(fig, height=380, margin=dict(l=50, r=20, t=70, b=20))
+    return _apply_layout(fig, height=400, margin=dict(l=50, r=20, t=50, b=60))
 
 
 def owner_scorecard(df_by_owner: pd.DataFrame) -> go.Figure:
@@ -186,6 +186,9 @@ def owner_scorecard(df_by_owner: pd.DataFrame) -> go.Figure:
 
     pivot["Total"] = pivot[SCORECARD_ORDER].sum(axis=1)
     pivot = pivot.sort_values("Total", ascending=True)  # bottom-up in Plotly
+
+    # Truncate long owner names for y-axis readability on mobile
+    pivot.index = [n[:14] + "\u2026" if len(n) > 14 else n for n in pivot.index]
 
     avg = pivot["Total"].mean()
     n_owners = len(pivot)
@@ -241,7 +244,7 @@ def owner_scorecard(df_by_owner: pd.DataFrame) -> go.Figure:
     return _apply_layout(
         fig,
         height=h,
-        margin=dict(l=140, r=50, t=20, b=20),
+        margin=dict(l=110, r=50, t=30, b=20),
         xaxis=dict(
             showticklabels=False,
             gridcolor="rgba(148,163,184,0.08)",
@@ -254,11 +257,12 @@ def owner_scorecard(df_by_owner: pd.DataFrame) -> go.Figure:
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.02,
+            y=1.06,
             xanchor="left",
             x=0,
             bgcolor="rgba(0,0,0,0)",
             font=dict(color="#94A3B8", size=11),
+            itemwidth=30,
         ),
     )
 
@@ -497,10 +501,10 @@ def priority_heatmap(df_by_owner: pd.DataFrame) -> go.Figure:
     return _apply_layout(
         fig,
         height=h,
-        margin=dict(l=140, r=20, t=20, b=40),
+        margin=dict(l=110, r=20, t=20, b=40),
         yaxis=dict(
             tickvals=list(range(n_owners)),
-            ticktext=owners,
+            ticktext=[n[:14] + "\u2026" if len(n) > 14 else n for n in owners],
             autorange="reversed",
             gridcolor="rgba(0,0,0,0)",
             zerolinecolor="rgba(0,0,0,0)",

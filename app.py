@@ -55,6 +55,27 @@ st.markdown("""
     hr {
         border-color: rgba(148,163,184,0.1) !important;
     }
+
+    /* Mobile responsive overrides */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 0.75rem;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        [data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+        }
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+        .kpi-value {
+            font-size: 1.5rem !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -96,7 +117,7 @@ def kpi_card(label: str, value: str, accent: str) -> str:
             color: #64748B;
             margin-bottom: 6px;
         ">{label}</div>
-        <div style="
+        <div class="kpi-value" style="
             font-size: 2rem;
             font-weight: 700;
             color: #F1F5F9;
