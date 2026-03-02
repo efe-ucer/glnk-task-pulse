@@ -81,7 +81,7 @@ st.markdown("""
 
 from notion_client_module import get_tasks
 from data_processing import build_dataframe, build_timeline_data, compute_kpis
-from config import CHART_CONFIG
+from config import CHART_CONFIG, PRIORITY_ORDER
 import charts
 
 
@@ -292,26 +292,64 @@ section_header("Team Performance")
 
 st.plotly_chart(charts.owner_scorecard(df_by_owner), use_container_width=True, config=CHART_CONFIG)
 
-# Overdue expander
-overdue_df = df[df["is_overdue"]][["title", "owner", "priority", "status", "dueDate", "days_overdue"]]
-overdue_df = overdue_df.sort_values("days_overdue", ascending=False)
+# Task List expander (All Active + Overdue tabs)
+active_df = df[df["status"] != "Complete"].copy()
+active_df = active_df.sort_values(["is_overdue", "days_overdue"], ascending=[False, False])
 
-with st.expander(f"View Overdue Tasks ({len(overdue_df)})", expanded=False):
-    if not overdue_df.empty:
-        st.dataframe(
-            overdue_df.rename(columns={
-                "title": "Task",
-                "owner": "Owner",
-                "priority": "Priority",
-                "status": "Status",
-                "dueDate": "Due Date",
-                "days_overdue": "Days Overdue",
-            }),
-            hide_index=True,
-            use_container_width=True,
-        )
-    else:
-        st.info("No overdue tasks with current filters.")
+overdue_df = active_df[active_df["is_overdue"]]
+
+label = f"Task List — {len(active_df)} active, {len(overdue_df)} overdue"
+with st.expander(label, expanded=False):
+    tab_active, tab_overdue = st.tabs(["All Active", "Overdue"])
+
+    COLS = ["title", "owner", "priority", "status", "dueDate", "days_overdue"]
+    COL_RENAME = {
+        "title": "Task", "owner": "Owner", "priority": "Priority",
+        "status": "Status", "dueDate": "Due Date", "days_overdue": "Days Overdue",
+    }
+
+    with tab_active:
+        if not active_df.empty:
+            st.dataframe(active_df[COLS].rename(columns=COL_RENAME),
+                         hide_index=True, use_container_width=True)
+        else:
+            st.info("No active tasks with current filters.")
+
+    with tab_overdue:
+        if not overdue_df.empty:
+            st.dataframe(overdue_df[COLS].rename(columns=COL_RENAME),
+                         hide_index=True, use_container_width=True)
+        else:
+            st.info("No overdue tasks with current filters.")
+
+
+# --- Priority View Section ---
+section_header("Priority View")
+
+sel_priority = st.selectbox(
+    "Filter by priority",
+    PRIORITY_ORDER,
+    index=PRIORITY_ORDER.index("Urgent"),
+    label_visibility="collapsed",
+)
+
+priority_df = df[
+    (df["status"] != "Complete") &
+    (df["priority"].fillna("Unset") == sel_priority)
+][["title", "owner", "status", "dueDate", "days_overdue", "is_overdue"]]
+priority_df = priority_df.sort_values(["is_overdue", "dueDate"], ascending=[False, True])
+
+if not priority_df.empty:
+    st.dataframe(
+        priority_df.drop(columns=["is_overdue"]).rename(columns={
+            "title": "Task", "owner": "Owner", "status": "Status",
+            "dueDate": "Due Date", "days_overdue": "Days Overdue",
+        }),
+        hide_index=True,
+        use_container_width=True,
+    )
+else:
+    st.info(f"No active {sel_priority} tasks with current filters.")
 
 
 # --- Work Breakdown Section ---
